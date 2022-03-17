@@ -1,6 +1,7 @@
 # + -> - -> * -> /
 # 연산 딕셔너리를 앞에서부터 사용한다.
 def dfs(sum,d,numbers):
+    # 입력받은 숫자열
     if d == N:
         result.append(sum)
         return
