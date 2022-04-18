@@ -1,77 +1,56 @@
+# 나눠서 푼 경우 = bfs 2번 사용
+from pprint import pprint
 from collections import deque
-import copy
 
-# 전설의 명검 "그람"을 생각하지않는 경우
-def bfs1():
-    yongsa1 = copy.deepcopy(miro)
-    q = deque([[0,0]])
-    di,dj = [0,1,0,-1],[1,0,-1,0]
+def bfs(y,x,status):
+    visited = [[0]*(m+1) for _ in range(n+1)]
+    q = deque([(y,x)])
+    visited[y][x] = 1
 
-    while q:
-        y,x = q.popleft()
-        if y == N-1 and x == M-1:
-            return yongsa1[N-1][M-1]
-
-        for i in range(4):
-            dy = y + di[i]
-            dx = x + dj[i]
-
-            if 0>dy or N<=dy or 0>dx or M<=dx or\
-                yongsa1[dy][dx]:
-                continue
-
-            q.append([dy,dx])
-            yongsa1[dy][dx] = yongsa1[y][x]+1
-
-# 전설의 명검 "그람"을 만나면 벽이 없어지는 경우
-def bfs2():
-    yongsa2 = copy.deepcopy(miro)
-    q = deque([[0,0]])
-    di,dj = [0,1,0,-1],[1,0,-1,0]
+    dy = [0,0,1,-1]
+    dx = [1,-1,0,0]
 
     while q:
         y,x = q.popleft()
-        if y == N-1 and x == M-1:
-            return yongsa2[N-1][M-1]
 
-        for i in range(4):
-            dy = y + di[i]
-            dx = x + dj[i]
+        for d in range(4):
+            ny = y+dy[d]
+            nx = x+dx[d]
 
-            if 0<=dy<N and 0<=dx<M and yongsa2[dy][dx] == -2:
-                for j in range(N):
-                    for k in range(M):
-                        if yongsa2[j][k] == -1:
-                            yongsa2[j][k] = 0
-                yongsa2[dy][dx] = 0
+            # 공주에게 직접가는 방법
+            if 1<=ny<n+1 and 1<=nx<m+1 and grid[ny][nx]!=1 and visited[ny][nx] == 0 and status == 1:
+                if grid[ny][nx] == -1:
+                    visited[ny][nx] = visited[y][x] + 1
 
-            if 0>dy or N<=dy or 0>dx or M<=dx or\
-                yongsa2[dy][dx]:
-                continue
+                    return visited[ny][nx]-1
 
-            q.append([dy,dx])
-            yongsa2[dy][dx] = yongsa2[y][x]+1
-                
-# -------------------------------------------------------------------------
+                visited[ny][nx] = visited[y][x] + 1
+                q.append((ny,nx))
 
-N,M,T = map(int,input().split())
+            # 소드를 들고 가는 방법
+            if 1<=ny<n+1 and 1<=nx<m+1 and grid[ny][nx]!=1 and visited[ny][nx] == 0 and status == 2:
+                if grid[ny][nx] == 2:
+                    visited[ny][nx] = visited[y][x] + 1
+                    StoP = abs(ny-n)+abs(nx-m)
 
-miro = [list(map(int,input().split())) for _ in range(N)]
+                    return visited[ny][nx] + StoP -1
+                    
+                visited[ny][nx] = visited[y][x] + 1
+                q.append((ny,nx))
 
-# 벽을 -1 전설의 검은 -2로 바꿔주기
-for i in range(N):
-    for j in range(M):
-        if miro[i][j] == 1:
-            miro[i][j] = -1
-        elif miro[i][j] == 2:
-            miro[i][j] = -2
+    return 1e9
 
-cnt1,cnt2 = bfs1(),bfs2()
+n,m,limited = map(int,input().split())
+grid = [[1]*(m+1)]+[[1]+list(map(int, input().split())) for _ in range(n)]
+grid[n][m] = -1
 
-if cnt1 and cnt2:
-    if min(cnt1,cnt2) <= T:
-        print(min(cnt1,cnt2))
-    else:
-        print("Fail")
+mnt = 1e9
+for i in range(1,3):
+    t = bfs(1,1,i)
+    if mnt > t:
+        mnt = t
+
+if mnt > limited:
+    print('Fail')
 else:
-    print("Fail")
+    print(mnt)
